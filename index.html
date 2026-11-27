@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChemMA: Multi-Agent Chemical Reasoning with Tools</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --badge-bg: #ecfdf5;
+      --badge-text: #065f46;
+      --badge-border: #a7f3d0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
+
+    .venue-badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border: 1px solid var(--badge-border);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .authors {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .authors sup {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .affiliations {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: #ffffff;
+      border-color: var(--text);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    section {
+      margin-top: 2.5rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p {
+      color: #1e293b;
+      margin-bottom: 0.9rem;
+    }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+
+    .card h3 {
+      font-size: 0.98rem;
+      font-weight: 650;
+      margin-bottom: 0.35rem;
+      color: var(--accent);
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .figure-placeholder {
+      margin-top: 1.25rem;
+      padding: 2rem 1rem;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 0.75rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 0.65rem 0.85rem;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    tr.highlight {
+      background: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    .caption {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.55rem;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.15rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .bibtex-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.65rem;
+    }
+
+    .copy-btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    footer {
+      margin-top: 3.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="venue-badge">Accepted to EACL 2027</div>
+      <h1>ChemMA: Multi-Agent Chemical Reasoning with Tools</h1>
+      <div class="authors">
+        Zheyu Huang<sup>1</sup>,
+        Ke Xu<sup>2</sup>,
+        Ling Chen<sup>1</sup>,
+        Meng Fang<sup>2</sup>
+      </div>
+      <div class="affiliations">
+        <sup>1</sup>University of Technology Sydney &nbsp;&middot;&nbsp;
+        <sup>2</sup>University of Liverpool
+      </div>
+
+      <div class="links">
+        <a class="btn btn-primary" href="#paper-placeholder" target="_blank" rel="noopener">
+          <span>&#128196;</span> Paper (Coming Soon)
+        </a>
+        <a class="btn" href="#code-placeholder" target="_blank" rel="noopener">
+          <span>&#128187;</span> Code (GitHub Placeholder)
+        </a>
+        <a class="btn" href="#bibtex">
+          <span>&#128203;</span> BibTeX
+        </a>
+      </div>
+    </header>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        Retrieval-augmented generation reduces the hallucinations of large language models on chemistry questions,
+        but static top-<em>k</em> retrieval adds topically related yet irrelevant passages and gives the model no signal
+        for when the evidence is sufficient. We present <strong>ChemMA</strong>, a multi-agent framework that answers
+        chemistry questions with tools. ChemMA first grounds the query into validated chemical entities, then a
+        Planner builds a dependency graph of tool calls, and an Executor runs these calls and writes the relevant
+        facts into a shared structured memory. A Constraint Verifier ends the loop only when the facts are sufficient
+        and chemically valid, and a Consistency Evaluator checks the final answer against them.
+      </p>
+      <p>
+        Across MMLU-Chem, SciBench, and ChemBench4K, ChemMA raises the average accuracy of Llama-3.1-8B from
+        24.48% to 46.01%, and with Qwen-2.5-7B reaches 50.44%—surpassing GPT-4o without tools (46.35%). On
+        Mol-Instructions, generated molecule validity increases from 0.47–0.65 to 0.95–0.99.
+      </p>
+    </section>
+
+    <section id="method">
+      <h2>Framework Overview</h2>
+      <p>
+        ChemMA formulates chemical question answering as an iterative, constraint-aware decision process over 13
+        deterministic cheminformatics, computation, retrieval, and lookup tools coordinated via a shared Structured Memory.
+      </p>
+
+      <div class="pipeline-grid">
+        <div class="card">
+          <h3>1. Chemical Grounding</h3>
+          <p>Separates hard structural validation (Regex + RDKit) from soft entity extraction to initialize verified query entities.</p>
+        </div>
+        <div class="card">
+          <h3>2. Dependency Planning</h3>
+          <p>Constructs a DAG of atomic tool calls under chemical preconditions so independent steps execute in parallel.</p>
+        </div>
+        <div class="card">
+          <h3>3. Action Execution</h3>
+          <p>Adapts tool queries, executes Python/RDKit/PubChem calls, and distills raw observations into atomic facts.</p>
+        </div>
+        <div class="card">
+          <h3>4. Dual Verification</h3>
+          <p>Constraint Verifier checks sufficiency &amp; chemical invariants (e.g., valency, atom balance); Consistency Evaluator synthesizes the final answer.</p>
+        </div>
+      </div>
+
+      <div class="figure-placeholder">
+        [ Architecture Figure Placeholder — Add <code>assets/overview.png</code> here later ]
+      </div>
+    </section>
+
+    <section id="results">
+      <h2>Main Results</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method / Backbone</th>
+              <th>MMLU-Chem</th>
+              <th>SciBench</th>
+              <th>ChemBench4K</th>
+              <th>Average</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Llama-3.1-8B (Direct)</td>
+              <td>42.90</td>
+              <td>3.30</td>
+              <td>27.25</td>
+              <td>24.48</td>
+            </tr>
+            <tr>
+              <td>Llama-3.1-8B + ChemRAG</td>
+              <td>52.15</td>
+              <td>3.56</td>
+              <td>25.88</td>
+              <td>27.20</td>
+            </tr>
+            <tr class="highlight">
+              <td>Llama-3.1-8B + ChemMA (Ours)</td>
+              <td>62.38</td>
+              <td>18.78</td>
+              <td>56.88</td>
+              <td>46.01</td>
+            </tr>
+            <tr class="highlight">
+              <td>Qwen-2.5-7B + ChemMA (Ours)</td>
+              <td>67.66</td>
+              <td>13.54</td>
+              <td>70.13</td>
+              <td>50.44</td>
+            </tr>
+            <tr>
+              <td>GPT-4o (Direct)</td>
+              <td>74.59</td>
+              <td>4.97</td>
+              <td>59.50</td>
+              <td>46.35</td>
+            </tr>
+            <tr>
+              <td>GPT-4o + ChemCrow</td>
+              <td>63.37</td>
+              <td>17.90</td>
+              <td>65.13</td>
+              <td>48.80</td>
+            </tr>
+            <tr class="highlight">
+              <td>GPT-4o + ChemMA (Ours)</td>
+              <td>76.90</td>
+              <td>21.83</td>
+              <td>73.50</td>
+              <td>57.41</td>
+            </tr>
+            <tr class="highlight">
+              <td>o1 + ChemMA (Ours)</td>
+              <td>84.49</td>
+              <td>43.23</td>
+              <td>67.38</td>
+              <td>65.03</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Accuracy (%) across MMLU-Chem, SciBench-Chem, and ChemBench4K (1,332 questions total).
+      </p>
+    </section>
+
+    <section id="bibtex">
+      <div class="bibtex-header">
+        <h2 style="border: none; margin: 0; padding: 0;">BibTeX</h2>
+        <button class="copy-btn" onclick="copyBibtex()">Copy</button>
+      </div>
+      <pre id="bibtex-code">@inproceedings{huang2027chemma,
+  title     = {ChemMA: Multi-Agent Chemical Reasoning with Tools},
+  author    = {Huang, Zheyu and Xu, Ke and Chen, Ling and Fang, Meng},
+  booktitle = {Proceedings of the 20th Conference of the European Chapter of the Association for Computational Linguistics (EACL)},
+  year      = {2027}
+}</pre>
+    </section>
+
+    <footer>
+      ChemMA Project Page &middot; Hosted on GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    function copyBibtex() {
+      const text = document.getElementById("bibtex-code").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.innerText = "Copied!";
+        setTimeout(() => { btn.innerText = "Copy"; }, 1800);
+      });
+    }
+  </script>
+</body>
+</html>
